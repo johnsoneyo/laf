@@ -4,6 +4,7 @@
  */
 package johnson4j.ejb;
 
+import com.crowninteractive.handlers.NullHandler;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import java.io.InputStream;
@@ -118,12 +119,14 @@ public class LafEJB {
     public LafUser createUser(johnson4j.dto.User usr) throws LafException {
 
         LafUser u = new LafUser();
-
+       
 
         validateUserEmail(usr.getEmail());
         validateScreen(usr.getScreen_name());
 
 
+        u.setFirstName(usr.getFirst_name());
+        u.setLastName(usr.getLast_name());
         u.setEmail(usr.getEmail());
         u.setPassword(usr.getPassword());
         u.setDob(parseDate(usr.getDob()));
@@ -191,7 +194,7 @@ public class LafEJB {
                 throw new LafException("email address already exists");
             }
         } catch (NoResultException no) {
-            log.log(Level.INFO, "email address already exists");
+            log.log(Level.INFO, "no such email exists");
         }
 
     }
@@ -207,7 +210,7 @@ public class LafEJB {
                 throw new LafException("screen name already exists");
             }
         } catch (NoResultException no) {
-            log.log(Level.INFO, "screen name already exists");
+            log.log(Level.INFO, "no such screen name");
         }
     }
 

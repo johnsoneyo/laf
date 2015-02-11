@@ -4,6 +4,7 @@
  */
 package johnson4j.services;
 
+import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -68,6 +69,7 @@ public class LAFResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response createUser(User usr) {
             try{
+             NullHandler nh = new NullHandler(usr);     
             johnson4j.entity.LafUser u = lafEJB.createUser(usr);
 
             return Response.ok(u, MediaType.APPLICATION_JSON).build();
@@ -75,6 +77,13 @@ public class LAFResource {
             catch(LafException no){
                 return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(),400)).build();
             }
+            catch(IllegalArgumentException no){
+                return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(),400)).build();
+            }
+            catch(IllegalAccessException no){
+                return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(),400)).build();
+            }
+           
        
     }
 
