@@ -122,6 +122,15 @@ public class LAFResource {
     }
     
     
+    @GET
+    @Path("/lafVideos")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getLafVideos(){
+        
+        return Response.ok(lafEJB.getLafVideos(),MediaType.APPLICATION_JSON).build();
+        
+    }
+    
     
     
 }

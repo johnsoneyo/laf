@@ -119,7 +119,7 @@ public class LafEJB {
     public LafUser createUser(johnson4j.dto.User usr) throws LafException {
 
         LafUser u = new LafUser();
-       
+
 
         validateUserEmail(usr.getEmail());
         validateScreen(usr.getScreen_name());
@@ -217,18 +217,24 @@ public class LafEJB {
     public LafUser login(User usr) throws LafException {
 
         Query q = em.createQuery("select l from LafUser l where l.email = :email and l.password = :password ");
-     
-        try{
-          q.setParameter("email", usr.getEmail());
-        q.setParameter("password", usr.getPassword());  
-         return (LafUser)q.getSingleResult();
-        }
-        catch(NoResultException no){
-           throw new LafException("No such user"); 
-        }
-        catch(NullPointerException no){
+
+        try {
+            q.setParameter("email", usr.getEmail());
+            q.setParameter("password", usr.getPassword());
+            return (LafUser) q.getSingleResult();
+        } catch (NoResultException no) {
+            throw new LafException("No such user");
+        } catch (NullPointerException no) {
             throw new LafException("One missing field");
         }
-        
+
+    }
+
+    public String getLafVideos() {
+
+        String ytbe = LafBundle.youTubeV3();
+        String googl_key = LafBundle.getGoogleKey();
+        String channel_id = LafBundle.getChannel();
+        return this.processRequest(ytbe + "/search?key=" + googl_key + "&channelId=" + channel_id + "&part=snippet,id&order=date&maxResults=5");
     }
 }

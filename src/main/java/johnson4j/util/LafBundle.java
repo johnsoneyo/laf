@@ -12,10 +12,25 @@ import java.util.ResourceBundle;
  */
 public class LafBundle {
 
+    private static  ResourceBundle rb = ResourceBundle.getBundle("laf");
+    
     public static String facebookGraph() {
-
-        ResourceBundle rb = ResourceBundle.getBundle("laf");
+ 
         return rb.getString("fb.graph.api");
 
+    }
+
+    public static String youTubeV3() {
+       
+        return rb.getString("ytbe.api");
+    }
+
+    public static String getGoogleKey() {
+        
+      return rb.getString("api.key");
+    }
+
+    public static String getChannel() {
+    return rb.getString("channel.id");
     }
 }
