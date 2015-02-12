@@ -88,6 +88,29 @@ public class LafEJB {
         }
 
     }
+    
+     private String processPostRequest(String reqURL) {
+
+        try {
+            URL url = new URL(reqURL);
+            HttpURLConnection request = (HttpURLConnection) url.openConnection();
+            request.setRequestMethod("POST");
+            request.connect();
+
+            StringWriter sw = new StringWriter();
+
+            InputStream is = request.getInputStream();
+            IOUtils.copy(is, sw);
+
+            return sw.toString();
+
+        } catch (Exception ex) {
+
+            ex.printStackTrace();
+            return null;
+        }
+
+    }
 
     public byte[] getFacebookPhoto(String id, int height, int width) {
 
@@ -182,7 +205,11 @@ public class LafEJB {
 
     }
 
-    public void publishPost(String id, String access_token) {
+    public String  publishPost(String id,String message, String access_token,String link,String place) {
+        String fbg = LafBundle.facebookGraph();
+      
+        return this.processPostRequest(fbg+"/"+id+"/feed?message="+message+"&link="+link+"&access_token="+access_token);
+     
     }
 
     private void validateUserEmail(String email) throws LafException {

@@ -132,5 +132,21 @@ public class LAFResource {
     }
     
     
+    @POST
+    @Path("/publishFacebookStory/{facebook_id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response publishFacebookStory(@PathParam("facebook_id")String facebook_id,
+            @QueryParam("message")String message,
+            @QueryParam("link")String link,
+            @QueryParam("place")String place, 
+            @QueryParam("access_token")String access_token
+                    ){
+        
+        this.lafEJB.publishPost(link,message, access_token, link, place);
+        
+        return Response.status(Response.Status.ACCEPTED).entity("").build();
+        
+    }
+    
     
 }
