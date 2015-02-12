@@ -113,10 +113,10 @@ public class LAFResource {
            .build();
          
         }catch(LafException le){
-           return Response.status(Response.Status.FORBIDDEN).header("Access-Control-Allow-Origin", "*").
+           return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").
                 header("Access-Control-Allow-Credentials", "true").
                 header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS, HEAD")
-                   .entity(new Error(le.getMessage(),403)).build();  
+                   .entity(new Error(le.getMessage(),404)).build();  
         }
         
     }

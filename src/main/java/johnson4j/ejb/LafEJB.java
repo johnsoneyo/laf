@@ -32,6 +32,7 @@ import johnson4j.entity.LafUser;
 import johnson4j.entity.LafUserMedia;
 import johnson4j.exception.LafException;
 import johnson4j.util.LafBundle;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -123,12 +124,12 @@ public class LafEJB {
 
         validateUserEmail(usr.getEmail());
         validateScreen(usr.getScreen_name());
-
+       
 
         u.setFirstName(usr.getFirst_name());
         u.setLastName(usr.getLast_name());
         u.setEmail(usr.getEmail());
-        u.setPassword(usr.getPassword());
+        u.setPassword(new String(Base64.encodeBase64(usr.getPassword().getBytes()) ));
         u.setDob(parseDate(usr.getDob()));
         u.setPhone(usr.getPhone());
         u.setScreenName(usr.getScreen_name());
@@ -216,11 +217,13 @@ public class LafEJB {
 
     public LafUser login(User usr) throws LafException {
 
+        
+        
         Query q = em.createQuery("select l from LafUser l where l.email = :email and l.password = :password ");
-
+        byte[] pwd = Base64.encodeBase64(usr.getPassword().getBytes());
         try {
             q.setParameter("email", usr.getEmail());
-            q.setParameter("password", usr.getPassword());
+            q.setParameter("password", new String(pwd));
             return (LafUser) q.getSingleResult();
         } catch (NoResultException no) {
             throw new LafException("No such user");
@@ -228,7 +231,7 @@ public class LafEJB {
             throw new LafException("One missing field");
         }
 
-    }
+    } 
 
     public String getLafVideos() {
 
