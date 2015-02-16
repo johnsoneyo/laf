@@ -28,7 +28,13 @@
             <version>1.8</version>
         </dependency>
         
-         <dependency>
+        <dependency>
+            <groupId>johnson4j</groupId>
+            <artifactId>jersey-bundle</artifactId>
+            <version>1.17.1</version>
+        </dependency>
+        
+        <dependency>
             <groupId>johnson4j</groupId>
             <artifactId>crown-util</artifactId>
             <version>1.1</version>

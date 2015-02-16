@@ -106,17 +106,11 @@ public class LAFResource {
         try{
        LafUser lu = lafEJB.login(usr);
         return Response.status(Response.Status.ACCEPTED).
-                header("Access-Control-Allow-Origin", "*").
-                header("Access-Control-Allow-Credentials", "true").
-                header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS, HEAD").
-               entity(lu)
+              entity(lu)
            .build();
          
         }catch(LafException le){
-           return Response.status(Response.Status.NOT_FOUND).header("Access-Control-Allow-Origin", "*").
-                header("Access-Control-Allow-Credentials", "true").
-                header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS, HEAD")
-                   .entity(new Error(le.getMessage(),404)).build();  
+           return Response.status(Response.Status.NOT_FOUND).entity(new Error(le.getMessage(),404)).build();  
         }
         
     }
