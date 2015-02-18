@@ -8,6 +8,7 @@ import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -38,7 +39,8 @@ public class LAFResource {
     private UriInfo context;
     @EJB
     LafEJB lafEJB;
-
+    
+   
     @GET
     @Path("/facebookDetail")
     @Produces(MediaType.APPLICATION_JSON)
@@ -74,15 +76,11 @@ public class LAFResource {
 
             return Response.ok(u, MediaType.APPLICATION_JSON).build();
             }
-            catch(LafException no){
+            catch(LafException  | IllegalArgumentException | IllegalAccessException no){
                 return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(),400)).build();
             }
-            catch(IllegalArgumentException no){
-                return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(),400)).build();
-            }
-            catch(IllegalAccessException no){
-                return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(),400)).build();
-            }
+           
+           
            
        
     }
