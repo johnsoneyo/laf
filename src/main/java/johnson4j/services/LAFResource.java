@@ -8,13 +8,14 @@ import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -39,20 +40,18 @@ public class LAFResource {
     private UriInfo context;
     @EJB
     LafEJB lafEJB;
-    
-   
+
     @GET
     @Path("/facebookDetail")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFaceBookDetails(@QueryParam("access_token") String token) {
-        try{
-        String faceBookDetail = lafEJB.getFaceBookDetail(token);
+        try {
+            String faceBookDetail = lafEJB.getFaceBookDetail(token);
 
-        return Response.ok(faceBookDetail, MediaType.APPLICATION_JSON).build();
+            return Response.ok(faceBookDetail, MediaType.APPLICATION_JSON).build();
+        } catch (LafException le) {
+            return Response.status(Response.Status.FORBIDDEN).entity(new Error(le.getMessage(), 403)).build();
         }
-        catch(LafException le){
-           return Response.status(Response.Status.FORBIDDEN).entity(new Error(le.getMessage(),403)).build();
-        }   
     }
 
     @GET
@@ -70,19 +69,36 @@ public class LAFResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createUser(User usr) {
-            try{
-             NullHandler nh = new NullHandler(usr);     
+        try {
+            NullHandler nh = new NullHandler(usr);
             johnson4j.entity.LafUser u = lafEJB.createUser(usr);
 
             return Response.ok(u, MediaType.APPLICATION_JSON).build();
-            }
-            catch(LafException  | IllegalArgumentException | IllegalAccessException no){
-                return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(),400)).build();
-            }
-           
-           
-           
-       
+        } catch (LafException | IllegalArgumentException | IllegalAccessException no) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(), 400)).build();
+        }
+
+
+    }
+
+    //method in progress
+    @PUT
+    @Path("/updateUser")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateUser(User usr) {
+
+
+        throw new java.lang.UnsupportedOperationException("");
+    }
+
+    //method in progress
+    @DELETE
+    @Path("/removeUser")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response removeUser(User usr) {
+
+        throw new java.lang.UnsupportedOperationException("");
     }
 
     @POST
@@ -92,53 +108,48 @@ public class LAFResource {
 
         johnson4j.entity.LafUser u = lafEJB.addFaceBook(id, laf_id);
 
-        return Response.ok(String.format("Facebook account : %s added",id), MediaType.TEXT_PLAIN).build();
+        return Response.ok(String.format("Facebook account : %s added", id), MediaType.TEXT_PLAIN).build();
     }
-    
-    
+
     @POST
     @Path("/login")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response login(User usr){
-        try{
-       LafUser lu = lafEJB.login(usr);
-        return Response.status(Response.Status.ACCEPTED).
-              entity(lu)
-           .build();
-         
-        }catch(LafException le){
-           return Response.status(Response.Status.NOT_FOUND).entity(new Error(le.getMessage(),404)).build();  
+    public Response login(User usr) {
+        try {
+            LafUser lu = lafEJB.login(usr);
+            return Response.status(Response.Status.ACCEPTED).
+                    entity(lu)
+                    .build();
+
+        } catch (LafException le) {
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(le.getMessage(), 404)).build();
         }
-        
+
     }
-    
-    
+
     @GET
     @Path("/lafVideos")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getLafVideos(){
-        
-        return Response.ok(lafEJB.getLafVideos(),MediaType.APPLICATION_JSON).build();
-        
+    public Response getLafVideos() {
+
+        return Response.ok(lafEJB.getLafVideos(), MediaType.APPLICATION_JSON).build();
+
     }
-    
-    
+
     @POST
     @Path("/publishFacebookStory/{facebook_id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response publishFacebookStory(@PathParam("facebook_id")String facebook_id,
-            @QueryParam("message")String message,
-            @QueryParam("link")String link,
-            @QueryParam("place")String place, 
-            @QueryParam("access_token")String access_token
-                    ){
-        
-        this.lafEJB.publishPost(link,message, access_token, link, place);
-        
+    public Response publishFacebookStory(@PathParam("facebook_id") String facebook_id,
+            @QueryParam("message") String message,
+            @QueryParam("link") String link,
+            @QueryParam("place") String place,
+            @QueryParam("access_token") String access_token) {
+
+        this.lafEJB.publishPost(link, message, access_token, link, place);
+
         return Response.status(Response.Status.ACCEPTED).entity("").build();
-        
+
     }
-    
     
 }
