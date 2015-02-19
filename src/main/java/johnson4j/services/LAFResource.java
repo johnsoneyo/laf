@@ -72,44 +72,41 @@ public class LAFResource {
     public Response createUser(User usr) {
         try {
             NullHandler nh = new NullHandler(usr);
-          
+
             johnson4j.entity.LafUser u = lafEJB.createUser(usr);
 
             return Response.ok(u, MediaType.APPLICATION_JSON).build();
-        } catch (LafException | IllegalAccessException | IllegalArgumentException  no) {
+        } catch (LafException | IllegalAccessException | IllegalArgumentException no) {
             return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(), 400)).build();
         }
-        
+
 
 
     }
-    
+
     @PUT
     @Path("/updateUser")
-    public Response updateUser(UpdateUser usr){
-        
-     try{   
-     LafUser u =   lafEJB.updateUser(usr);
-     return Response.status(Response.Status.OK).entity(u).build();
-     }
-     catch(LafException lf){
-        return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(),404)).build();  
-     }
-     
+    public Response updateUser(UpdateUser usr) {
+
+        try {
+            LafUser u = lafEJB.updateUser(usr);
+            return Response.status(Response.Status.OK).entity(u).build();
+        } catch (LafException lf) {
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(), 404)).build();
+        }
+
     }
-    
-   
+
     @DELETE
     @Path("/removeUser/{id}")
-    public Response removeUser(@PathParam("id")String id){
-       try{
-        lafEJB.removeUser(id);
-        return Response.status(Response.Status.OK).entity("user has been removed").build();
-       }
-       catch(LafException lf){
-            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(),404)).build();   
-       }
-        
+    public Response removeUser(@PathParam("id") String id) {
+        try {
+            lafEJB.removeUser(id);
+            return Response.status(Response.Status.OK).entity("user has been removed").build();
+        } catch (LafException lf) {
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(), 404)).build();
+        }
+
     }
 
     @POST
@@ -162,8 +159,9 @@ public class LAFResource {
         return Response.status(Response.Status.ACCEPTED).entity("").build();
 
     }
-     
     
-   
+    
+    
+    
     
 }
