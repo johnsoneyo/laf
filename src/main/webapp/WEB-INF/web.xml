@@ -7,23 +7,6 @@ version="3.0">
   <display-name>Archetype Created Web Application</display-name>
   
   
-  <servlet>
-        <servlet-name>CORS Filter</servlet-name>
-        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
-        <init-param>
-            <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-            <param-value>rest.CORSFilter</param-value>
-        </init-param>
-       
-       <load-on-startup>1</load-on-startup>  
-       
-      
-    </servlet>
-    
-    <servlet-mapping>
-    <servlet-name>CORS Filter</servlet-name>
-    <url-pattern>/web/*</url-pattern>
-    
-    </servlet-mapping>
+  
   
 </web-app>

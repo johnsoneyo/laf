@@ -4,20 +4,17 @@
  */
 package johnson4j.services;
 
+import com.crowninteractive.handlers.EmailHandler;
 import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -26,7 +23,6 @@ import javax.ws.rs.core.Response;
 import johnson4j.dto.User;
 import johnson4j.ejb.LafEJB;
 import johnson4j.dto.Error;
-import johnson4j.dto.UpdateUser;
 import johnson4j.entity.LafUser;
 import johnson4j.exception.LafException;
 
@@ -74,40 +70,22 @@ public class LAFResource {
     public Response createUser(User usr) {
         try {
             NullHandler nh = new NullHandler(usr);
+          
             johnson4j.entity.LafUser u = lafEJB.createUser(usr);
 
             return Response.ok(u, MediaType.APPLICATION_JSON).build();
-        } catch (LafException | IllegalArgumentException | IllegalAccessException no) {
+        } catch (LafException | IllegalAccessException | IllegalArgumentException  no) {
             return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(), 400)).build();
         }
+        
 
 
     }
-
+    
+    
+    
     //method in progress
-    @PUT
-    @Path("/updateUser")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(UpdateUser usr) {
-        try {
-         LafUser u =   lafEJB.updateUser(usr);
-         return Response.status(Response.Status.OK).entity(u).build();
-        } catch (LafException ex) {
-         Logger.getLogger(LAFResource.class.getName()).log(Level.SEVERE, null, ex);   
-         return Response.status(Response.Status.NOT_FOUND).entity(new Error(ex.getMessage(),404)).build();
-            
-        }
-    }
-
-    //method in progress
-    @DELETE
-    @Path("/removeUser")
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response removeUser(User usr) {
-
-        throw new java.lang.UnsupportedOperationException("");
-    }
+ 
 
     @POST
     @Path("/addFacebook/{laf_id}")
@@ -122,7 +100,7 @@ public class LAFResource {
     @POST
     @Path("/login")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes("application/json")
     public Response login(User usr) {
         try {
             LafUser lu = lafEJB.login(usr);
@@ -159,5 +137,8 @@ public class LAFResource {
         return Response.status(Response.Status.ACCEPTED).entity("").build();
 
     }
+     
+    
+   
     
 }

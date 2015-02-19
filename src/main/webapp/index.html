@@ -17,51 +17,55 @@ and open the template in the editor.
 
     <body>
 
-        <h2>Context : laf/</h2>
+        <div class="container">
+            <h2>Context : laf/</h2>
+            <h4>Accepts : JSON</h4>   
+        </div>
+
 
         <div class="container">
-            <div class="col-lg-8">  <table class="table table-hover">
- 
-            
-            <tr>
-                <th>Method</th><th>Type</th><th>Params</th>
-            </tr>
-            
-             <tr>
-                <td>web/lafresource/createUser</td><td>POST</td><td></td>
-            </tr>
-            
-              <tr>
-                <td>web/lafresource/updateUser</td><td>PUT</td><td></td>
-            </tr>
-            
-             <tr>
-                <td>web/lafresource/removeUser</td><td>DELETE</td><td></td>
-            </tr>
-            <tr>
-                <td>web/lafresource/facebookDetail</td><td>GET</td><td>access_token</td>
-            </tr>
+            <div class="col-lg-12">  <table class="table table-hover">
 
-            <tr>
-                <td>web/lafresource/faceBookPhoto/{id}</td><td>GET</td><td>height,width</td>
-            </tr>
-            
-             <tr>
-                <td>web/lafresource/addFacebook/{laf_id}</td><td>POST</td><td>id</td>
-            </tr>
-            
-             <tr>
-                <td>web/lafresource/login</td><td>POST</td><td></td>
-            </tr>
-            
-             <tr>
-                <td>web/lafresource/lafVideos</td><td>GET</td><td></td>
-            </tr>
 
-        </table></div>
-            <div class="col-lg-4"></div>
+                    <tr>
+                        <th>Method</th><th>Type</th><th>Params</th><th>Payload</th>
+                    </tr>
+
+                    <tr>
+                        <td>web/lafresource/createUser</td><td>POST</td><td></td><td>first_name,last_name,email,phone,screen_name,dob,password</td>
+                    </tr>
+
+                    <tr>
+                        <td>web/lafresource/updateUser</td><td>PUT</td><td></td><td>id,first_name,last_name,email,phone,screen_name,dob,password</td>
+                    </tr>
+
+                    <tr>
+                        <td>web/lafresource/removeUser/{id}</td><td>DELETE</td><td></td><td></td>
+                    </tr>
+                    <tr>
+                        <td>web/lafresource/facebookDetail</td><td>GET</td><td>access_token</td><td></td>
+                    </tr>
+
+                    <tr>
+                        <td>web/lafresource/faceBookPhoto/{id}</td><td>GET</td><td>height,width</td><td></td>
+                    </tr>
+
+                    <tr>
+                        <td>web/lafresource/addFacebook/{laf_id}</td><td>POST</td><td>id</td><td></td>
+                    </tr>
+
+                    <tr>
+                        <td>web/lafresource/login</td><td>POST</td><td></td><td>email,password</td>
+                    </tr>
+
+                    <tr>
+                        <td>web/lafresource/lafVideos</td><td>GET</td><td></td><td></td>
+                    </tr>
+
+                </table></div>
+
         </div>
-      
+
 
     </body>
 </html>

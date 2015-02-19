@@ -48,8 +48,8 @@ public class LafEJB {
     private final Logger log = Logger.getLogger(getClass().getName());
     @PersistenceContext
     EntityManager em;
-    @Resource
-    TimerService timerService;
+//    @Resource
+//    TimerService timerService;
 
     public String getFaceBookDetail(String access_token) throws LafException {
         if (access_token != null) {
@@ -168,7 +168,7 @@ public class LafEJB {
         ScheduleExpression birthDay = new ScheduleExpression().
                 dayOfMonth(Calendar.DAY_OF_MONTH).month(Calendar.MONTH);
 
-        timerService.createCalendarTimer(birthDay, new TimerConfig(u, true));
+//        timerService.createCalendarTimer(birthDay, new TimerConfig(u, true));
 
         return u;
     }
