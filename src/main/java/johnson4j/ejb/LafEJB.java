@@ -88,8 +88,8 @@ public class LafEJB {
         }
 
     }
-    
-     private String processPostRequest(String reqURL) {
+
+    private String processPostRequest(String reqURL) {
 
         try {
             URL url = new URL(reqURL);
@@ -147,12 +147,12 @@ public class LafEJB {
 
         validateUserEmail(usr.getEmail());
         validateScreen(usr.getScreen_name());
-       
+
 
         u.setFirstName(usr.getFirst_name());
         u.setLastName(usr.getLast_name());
         u.setEmail(usr.getEmail());
-        u.setPassword(new String(Base64.encodeBase64(usr.getPassword().getBytes()) ));
+        u.setPassword(new String(Base64.encodeBase64(usr.getPassword().getBytes())));
         u.setDob(parseDate(usr.getDob()));
         u.setPhone(usr.getPhone());
         u.setScreenName(usr.getScreen_name());
@@ -205,11 +205,11 @@ public class LafEJB {
 
     }
 
-    public String  publishPost(String id,String message, String access_token,String link,String place) {
+    public String publishPost(String id, String message, String access_token, String link, String place) {
         String fbg = LafBundle.facebookGraph();
-      
-        return this.processPostRequest(fbg+"/"+id+"/feed?message="+message+"&link="+link+"&access_token="+access_token);
-     
+
+        return this.processPostRequest(fbg + "/" + id + "/feed?message=" + message + "&link=" + link + "&access_token=" + access_token);
+
     }
 
     private void validateUserEmail(String email) throws LafException {
@@ -244,8 +244,8 @@ public class LafEJB {
 
     public LafUser login(User usr) throws LafException {
 
-        
-        
+
+
         Query q = em.createQuery("select l from LafUser l where l.email = :email and l.password = :password ");
         byte[] pwd = Base64.encodeBase64(usr.getPassword().getBytes());
         try {
@@ -258,7 +258,7 @@ public class LafEJB {
             throw new LafException("One missing field");
         }
 
-    } 
+    }
 
     public String getLafVideos() {
 
@@ -268,20 +268,33 @@ public class LafEJB {
         return this.processRequest(ytbe + "/search?key=" + googl_key + "&channelId=" + channel_id + "&part=snippet,id&order=date&maxResults=5");
     }
 
-    public LafUser updateUser(UpdateUser usr)throws LafException {
-       
-        
-        LafUser u = em.find(LafUser.class,Integer.parseInt(usr.getId()));
-        if(u!=null){
+    public LafUser updateUser(UpdateUser usr) throws LafException {
+
+
+        LafUser u = em.find(LafUser.class, Integer.parseInt(usr.getId()));
+        if (u != null) {
             u.setDateModified(new Date());
             u.setDob(parseDate(usr.getDob()));
             u.setEmail(usr.getEmail());
             u.setFirstName(usr.getFirst_name());
             u.setLastName(usr.getLast_name());
             u.setPhone(usr.getPhone());
-           em.merge(u);
-          return u;  
-        }else throw new LafException("No user found ");
-        
-       }
+            em.merge(u);
+            return u;
+        } else {
+            throw new LafException("No user found ");
+        }
+
+    }
+
+    public void removeUser(String id) throws LafException {
+
+        LafUser u = em.find(LafUser.class, Integer.parseInt(id));
+        if (u != null) {
+            em.remove(u);
+        } else {
+            throw new LafException("No user found ");
+        }
+
+    }
 }

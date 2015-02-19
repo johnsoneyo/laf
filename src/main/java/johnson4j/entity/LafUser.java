@@ -81,7 +81,7 @@ public class LafUser implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateModified;
     @JoinColumn(name = "laf_id", referencedColumnName = "laf_id", insertable = false, updatable = false)
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "lafUser")
+    @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "lafUser")
     private LafUserMedia lafUserMedia;
 
     public LafUser() {

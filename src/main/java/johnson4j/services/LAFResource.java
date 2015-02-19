@@ -4,17 +4,18 @@
  */
 package johnson4j.services;
 
-import com.crowninteractive.handlers.EmailHandler;
 import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.Response;
 import johnson4j.dto.User;
 import johnson4j.ejb.LafEJB;
 import johnson4j.dto.Error;
+import johnson4j.dto.UpdateUser;
 import johnson4j.entity.LafUser;
 import johnson4j.exception.LafException;
 
@@ -82,10 +84,33 @@ public class LAFResource {
 
     }
     
+    @PUT
+    @Path("/updateUser")
+    public Response updateUser(UpdateUser usr){
+        
+     try{   
+     LafUser u =   lafEJB.updateUser(usr);
+     return Response.status(Response.Status.OK).entity(u).build();
+     }
+     catch(LafException lf){
+        return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(),404)).build();  
+     }
+     
+    }
     
-    
-    //method in progress
- 
+   
+    @DELETE
+    @Path("/removeUser/{id}")
+    public Response removeUser(@PathParam("id")String id){
+       try{
+        lafEJB.removeUser(id);
+        return Response.status(Response.Status.OK).entity("user has been removed").build();
+       }
+       catch(LafException lf){
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(),404)).build();   
+       }
+        
+    }
 
     @POST
     @Path("/addFacebook/{laf_id}")
