@@ -6,6 +6,8 @@ package johnson4j.services;
 
 import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
@@ -24,6 +26,7 @@ import javax.ws.rs.core.Response;
 import johnson4j.dto.User;
 import johnson4j.ejb.LafEJB;
 import johnson4j.dto.Error;
+import johnson4j.dto.UpdateUser;
 import johnson4j.entity.LafUser;
 import johnson4j.exception.LafException;
 
@@ -86,10 +89,15 @@ public class LAFResource {
     @Path("/updateUser")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(User usr) {
-
-
-        throw new java.lang.UnsupportedOperationException("");
+    public Response updateUser(UpdateUser usr) {
+        try {
+         LafUser u =   lafEJB.updateUser(usr);
+         return Response.status(Response.Status.OK).entity(u).build();
+        } catch (LafException ex) {
+         Logger.getLogger(LAFResource.class.getName()).log(Level.SEVERE, null, ex);   
+         return Response.status(Response.Status.NOT_FOUND).entity(new Error(ex.getMessage(),404)).build();
+            
+        }
     }
 
     //method in progress

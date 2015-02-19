@@ -4,7 +4,6 @@
  */
 package johnson4j.ejb;
 
-import com.crowninteractive.handlers.NullHandler;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import java.io.InputStream;
@@ -27,6 +26,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import johnson4j.dto.UpdateUser;
 import johnson4j.dto.User;
 import johnson4j.entity.LafUser;
 import johnson4j.entity.LafUserMedia;
@@ -267,4 +267,21 @@ public class LafEJB {
         String channel_id = LafBundle.getChannel();
         return this.processRequest(ytbe + "/search?key=" + googl_key + "&channelId=" + channel_id + "&part=snippet,id&order=date&maxResults=5");
     }
+
+    public LafUser updateUser(UpdateUser usr)throws LafException {
+       
+        
+        LafUser u = em.find(LafUser.class,Integer.parseInt(usr.getId()));
+        if(u!=null){
+            u.setDateModified(new Date());
+            u.setDob(parseDate(usr.getDob()));
+            u.setEmail(usr.getEmail());
+            u.setFirstName(usr.getFirst_name());
+            u.setLastName(usr.getLast_name());
+            u.setPhone(usr.getPhone());
+           em.merge(u);
+          return u;  
+        }else throw new LafException("No user found ");
+        
+       }
 }
