@@ -51,7 +51,7 @@ public class LAFResource {
 
             return Response.ok(faceBookDetail, MediaType.APPLICATION_JSON).build();
         } catch (LafException le) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Error(le.getMessage(), 403)).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Error(le.getMessage())).build();
         }
     }
 
@@ -77,10 +77,8 @@ public class LAFResource {
 
             return Response.ok(u, MediaType.APPLICATION_JSON).build();
         } catch (LafException | IllegalAccessException | IllegalArgumentException no) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(), 400)).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage())).build();
         }
-
-
 
     }
 
@@ -92,10 +90,12 @@ public class LAFResource {
             LafUser u = lafEJB.updateUser(usr);
             return Response.status(Response.Status.OK).entity(u).build();
         } catch (LafException lf) {
-            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(), 404)).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage())).build();
         }
 
     }
+    
+    
 
     @DELETE
     @Path("/removeUser/{id}")
@@ -104,7 +104,7 @@ public class LAFResource {
             lafEJB.removeUser(id);
             return Response.status(Response.Status.OK).entity("user has been removed").build();
         } catch (LafException lf) {
-            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(), 404)).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage())).build();
         }
 
     }
@@ -131,17 +131,17 @@ public class LAFResource {
                     .build();
 
         } catch (LafException le) {
-            return Response.status(Response.Status.NOT_FOUND).entity(new Error(le.getMessage(), 404)).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(le.getMessage())).build();
         }
 
     }
 
     @GET
-    @Path("/lafVideos")
+    @Path("/lafVideos/{maxResults}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getLafVideos() {
+    public Response getLafVideos(@PathParam("maxResults")String maxResults) {
 
-        return Response.ok(lafEJB.getLafVideos(), MediaType.APPLICATION_JSON).build();
+        return Response.ok(lafEJB.getLafVideos(maxResults), MediaType.APPLICATION_JSON).build();
 
     }
 

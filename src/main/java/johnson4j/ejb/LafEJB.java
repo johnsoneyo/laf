@@ -260,12 +260,12 @@ public class LafEJB {
 
     }
 
-    public String getLafVideos() {
+    public String getLafVideos(String maxResults) {
 
         String ytbe = LafBundle.youTubeV3();
         String googl_key = LafBundle.getGoogleKey();
         String channel_id = LafBundle.getChannel();
-        return this.processRequest(ytbe + "/search?key=" + googl_key + "&channelId=" + channel_id + "&part=snippet,id&order=date&maxResults=5");
+        return this.processRequest(ytbe + "/search?key=" + googl_key + "&channelId=" + channel_id + "&part=snippet,id&order=date&maxResults="+maxResults);
     }
 
     public LafUser updateUser(UpdateUser usr) throws LafException {
