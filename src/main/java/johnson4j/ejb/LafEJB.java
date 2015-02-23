@@ -138,7 +138,7 @@ public class LafEJB {
 
     }
 
-    public LafUser createUser(johnson4j.dto.User usr) throws LafException,ParseException {
+    public LafUser createUser(johnson4j.dto.User usr) throws LafException {
 
         LafUser u = new LafUser();
 
@@ -183,13 +183,20 @@ public class LafEJB {
         return usr;
     }
 
-    private Date parseDate(String dob) throws ParseException{
-       
-            SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-            return date.parse(dob);
-      
+    private Date parseDate(String dob) throws LafException{
+          Date d  = null;   
+        try{
+          SimpleDateFormat date   = new SimpleDateFormat("yyyy-MM-dd");
+           d = date.parse(dob);
+            }
+            catch(ParseException e){
+                throw new LafException(e.getMessage()+" Use yyyy-MM-dd format instead");
+            }
+      return d;
+          
     }
 
+    
     @Timeout
     public void sendBirthdayEmail(Timer timer) {
         LafUser lu = (LafUser) timer.getInfo();
@@ -261,7 +268,7 @@ public class LafEJB {
         return this.processRequest(ytbe + "/search?key=" + googl_key + "&channelId=" + channel_id + "&part=snippet,id&order=date&maxResults="+maxResults);
     }
 
-    public LafUser updateUser(UpdateUser usr) throws LafException,ParseException {
+    public LafUser updateUser(UpdateUser usr) throws LafException {
 
 
         LafUser u = em.find(LafUser.class, Integer.parseInt(usr.getId()));

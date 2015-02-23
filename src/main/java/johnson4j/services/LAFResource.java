@@ -84,7 +84,7 @@ public class LAFResource {
             johnson4j.entity.LafUser u = lafEJB.createUser(usr);
 
             return Response.ok(u, MediaType.APPLICATION_JSON).build();
-        } catch (LafException | IllegalAccessException | IllegalArgumentException | ParseException no) {
+        } catch (LafException | IllegalAccessException | IllegalArgumentException no) {
             return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(), 400)).build();
         }
 
@@ -103,16 +103,13 @@ public class LAFResource {
             try {
                 LafUser u = lafEJB.updateUser(usr);
                 return Response.status(Response.Status.OK).entity(u).build();
-            } catch (ParseException | LafException lf) {
+            } catch (LafException lf) {
                 return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(), 404)).build();
             }
 
         } else {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Error("You require a valid token to make this request", 401)).build();
         }
-
-
-
 
     }
 
@@ -159,7 +156,6 @@ public class LAFResource {
             LafUser lu = lafEJB.login(usr);
             String access_token = tkGen.generateToken();
 
-            System.out.println(access_token);
             loginToken.put(access_token, lu.getScreenName());
             return Response.status(Response.Status.ACCEPTED).
                     entity(lu).header("access_token", access_token)
