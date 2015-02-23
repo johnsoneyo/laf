@@ -10,18 +10,16 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Resource;
 import javax.ejb.ScheduleExpression;
 import javax.ejb.Stateless;
 import javax.ejb.Timeout;
 import javax.ejb.Timer;
-import javax.ejb.TimerConfig;
-import javax.ejb.TimerService;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -140,7 +138,7 @@ public class LafEJB {
 
     }
 
-    public LafUser createUser(johnson4j.dto.User usr) throws LafException {
+    public LafUser createUser(johnson4j.dto.User usr) throws LafException,ParseException {
 
         LafUser u = new LafUser();
 
@@ -185,16 +183,11 @@ public class LafEJB {
         return usr;
     }
 
-    private Date parseDate(String dob) {
-        try {
+    private Date parseDate(String dob) throws ParseException{
+       
             SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
             return date.parse(dob);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
-
-
+      
     }
 
     @Timeout
@@ -268,7 +261,7 @@ public class LafEJB {
         return this.processRequest(ytbe + "/search?key=" + googl_key + "&channelId=" + channel_id + "&part=snippet,id&order=date&maxResults="+maxResults);
     }
 
-    public LafUser updateUser(UpdateUser usr) throws LafException {
+    public LafUser updateUser(UpdateUser usr) throws LafException,ParseException {
 
 
         LafUser u = em.find(LafUser.class, Integer.parseInt(usr.getId()));

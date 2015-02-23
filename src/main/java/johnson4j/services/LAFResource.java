@@ -6,6 +6,7 @@ package johnson4j.services;
 
 import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
+import java.text.ParseException;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
@@ -51,7 +52,7 @@ public class LAFResource {
 
             return Response.ok(faceBookDetail, MediaType.APPLICATION_JSON).build();
         } catch (LafException le) {
-            return Response.status(Response.Status.FORBIDDEN).entity(new Error(le.getMessage())).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(new Error(le.getMessage(),403)).build();
         }
     }
 
@@ -76,8 +77,8 @@ public class LAFResource {
             johnson4j.entity.LafUser u = lafEJB.createUser(usr);
 
             return Response.ok(u, MediaType.APPLICATION_JSON).build();
-        } catch (LafException | IllegalAccessException | IllegalArgumentException no) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage())).build();
+        } catch (LafException | IllegalAccessException | IllegalArgumentException | ParseException no) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new Error(no.getMessage(),400)).build();
         }
 
     }
@@ -89,8 +90,8 @@ public class LAFResource {
         try {
             LafUser u = lafEJB.updateUser(usr);
             return Response.status(Response.Status.OK).entity(u).build();
-        } catch (LafException lf) {
-            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage())).build();
+        } catch (ParseException | LafException lf) {
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(),404)).build();
         }
 
     }
@@ -104,7 +105,7 @@ public class LAFResource {
             lafEJB.removeUser(id);
             return Response.status(Response.Status.OK).entity("user has been removed").build();
         } catch (LafException lf) {
-            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage())).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(),404)).build();
         }
 
     }
@@ -131,7 +132,7 @@ public class LAFResource {
                     .build();
 
         } catch (LafException le) {
-            return Response.status(Response.Status.NOT_FOUND).entity(new Error(le.getMessage())).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(le.getMessage(),404)).build();
         }
 
     }

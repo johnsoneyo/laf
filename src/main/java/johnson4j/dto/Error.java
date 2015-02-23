@@ -11,14 +11,15 @@ package johnson4j.dto;
 public class Error {
     
     private String message;
-    
+    private int code;
 
     public Error() {
     }
 
-    public Error(String messag) {
+    public Error(String message, int code) {
         this.message = message;
-     }
+        this.code = code;
+    }
     
     
 
@@ -30,7 +31,14 @@ public class Error {
         this.message = message;
     }
 
-   
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+    
     
     
 }
