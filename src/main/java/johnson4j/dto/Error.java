@@ -16,6 +16,12 @@ public class Error {
     public Error() {
     }
 
+    public Error(String message) {
+        this.message = message;
+    }
+    
+    
+
     public Error(String message, int code) {
         this.message = message;
         this.code = code;
