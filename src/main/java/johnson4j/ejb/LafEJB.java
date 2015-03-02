@@ -16,10 +16,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Resource;
 import javax.ejb.ScheduleExpression;
 import javax.ejb.Stateless;
 import javax.ejb.Timeout;
 import javax.ejb.Timer;
+import javax.ejb.TimerConfig;
+import javax.ejb.TimerService;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -46,8 +49,8 @@ public class LafEJB {
     private final Logger log = Logger.getLogger(getClass().getName());
     @PersistenceContext
     EntityManager em;
-//    @Resource
-//    TimerService timerService;
+    @Resource
+    TimerService timerService;
 
     public String getFaceBookDetail(String access_token) throws LafException {
         if (access_token != null) {
@@ -71,12 +74,9 @@ public class LafEJB {
             HttpURLConnection request = (HttpURLConnection) url.openConnection();
             request.setRequestMethod("GET");
             request.connect();
-
             StringWriter sw = new StringWriter();
-
             InputStream is = request.getInputStream();
             IOUtils.copy(is, sw);
-
             return sw.toString();
 
         } catch (Exception ex) {
@@ -142,10 +142,8 @@ public class LafEJB {
 
         LafUser u = new LafUser();
 
-
         validateUserEmail(usr.getEmail());
         validateScreen(usr.getScreen_name());
-
 
         u.setFirstName(usr.getFirst_name());
         u.setLastName(usr.getLast_name());
@@ -156,6 +154,7 @@ public class LafEJB {
         u.setScreenName(usr.getScreen_name());
         u.setDateCreated(new Date());
         u.setDateModified(new Date());
+        u.setCredit(100.00);
         em.persist(u);
         LafUserMedia usm = new LafUserMedia();
         usm.setLafId(u.getLafId());
@@ -166,7 +165,7 @@ public class LafEJB {
         ScheduleExpression birthDay = new ScheduleExpression().
                 dayOfMonth(Calendar.DAY_OF_MONTH).month(Calendar.MONTH);
 
-//        timerService.createCalendarTimer(birthDay, new TimerConfig(u, true));
+        timerService.createCalendarTimer(birthDay, new TimerConfig(u, true));
 
         return u;
     }
@@ -183,20 +182,18 @@ public class LafEJB {
         return usr;
     }
 
-    private Date parseDate(String dob) throws LafException{
-          Date d  = null;   
-        try{
-          SimpleDateFormat date   = new SimpleDateFormat("yyyy-MM-dd");
-           d = date.parse(dob);
-            }
-            catch(ParseException e){
-                throw new LafException(e.getMessage()+" Use yyyy-MM-dd format instead");
-            }
-      return d;
-          
+    private Date parseDate(String dob) throws LafException {
+        Date d = null;
+        try {
+            SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+            d = date.parse(dob);
+        } catch (ParseException e) {
+            throw new LafException(e.getMessage() + " Use yyyy-MM-dd format instead");
+        }
+        return d;
+
     }
 
-    
     @Timeout
     public void sendBirthdayEmail(Timer timer) {
         LafUser lu = (LafUser) timer.getInfo();
@@ -244,8 +241,6 @@ public class LafEJB {
 
     public LafUser login(User usr) throws LafException {
 
-
-
         Query q = em.createQuery("select l from LafUser l where l.email = :email and l.password = :password ");
         byte[] pwd = Base64.encodeBase64(usr.getPassword().getBytes());
         try {
@@ -265,7 +260,7 @@ public class LafEJB {
         String ytbe = LafBundle.youTubeV3();
         String googl_key = LafBundle.getGoogleKey();
         String channel_id = LafBundle.getChannel();
-        return this.processRequest(ytbe + "/search?key=" + googl_key + "&channelId=" + channel_id + "&part=snippet,id&order=date&maxResults="+maxResults);
+        return this.processRequest(ytbe + "/search?key=" + googl_key + "&channelId=" + channel_id + "&part=snippet,id&order=date&maxResults=" + maxResults);
     }
 
     public LafUser updateUser(UpdateUser usr) throws LafException {

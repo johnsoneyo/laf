@@ -6,11 +6,18 @@ package johnson4j.services;
 
 import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
-import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.ejb.ScheduleExpression;
 import javax.ejb.Stateless;
+import javax.ejb.Timeout;
+import javax.ejb.Timer;
+import javax.ejb.TimerConfig;
+import javax.ejb.TimerService;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.core.Context;
@@ -28,6 +35,7 @@ import javax.ws.rs.core.Response;
 import johnson4j.dto.User;
 import johnson4j.ejb.LafEJB;
 import johnson4j.dto.Error;
+import johnson4j.dto.SessionToken;
 import johnson4j.dto.UpdateUser;
 import johnson4j.entity.LafUser;
 import johnson4j.exception.LafException;
@@ -48,7 +56,9 @@ public class LAFResource {
     LafEJB lafEJB;
     @EJB
     TokenGenerator tkGen;
-    Map<String, String> loginToken = new HashMap();
+    Map<String, SessionToken> loginToken = new HashMap();
+    @Resource
+    TimerService time;
 
     @GET
     @Path("/facebookDetail")
@@ -96,7 +106,7 @@ public class LAFResource {
 
 
         String access_token = hh.getHeaderString("access_token");
-        String res = loginToken.get(access_token);
+        SessionToken res = loginToken.get(access_token);
 
         if (res != null) {
 
@@ -118,7 +128,7 @@ public class LAFResource {
     public Response removeUser(@Context HttpHeaders hh, @PathParam("id") String id) {
 
         String access_token = hh.getHeaderString("access_token");
-        String res = loginToken.get(access_token);
+        SessionToken res = loginToken.get(access_token);
 
         if (res != null) {
 
@@ -156,7 +166,18 @@ public class LAFResource {
             LafUser lu = lafEJB.login(usr);
             String access_token = tkGen.generateToken();
 
-            loginToken.put(access_token, lu.getScreenName());
+            SessionToken s = createTokenObject(access_token);
+            Date d = s.getEndTime();
+            Calendar cl = Calendar.getInstance();
+            cl.setTime(d);
+
+            loginToken.put(access_token, s);
+
+            ScheduleExpression se = new ScheduleExpression().second(cl.get(Calendar.SECOND))
+                    .minute(cl.get(Calendar.MINUTE)).hour(cl.get(Calendar.HOUR));
+            time.createCalendarTimer(se, new TimerConfig(s, true));
+
+
             return Response.status(Response.Status.ACCEPTED).
                     entity(lu).header("access_token", access_token)
                     .build();
@@ -172,7 +193,7 @@ public class LAFResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLafVideos(@Context HttpHeaders hh, @PathParam("maxResults") String maxResults) {
         String access_token = hh.getHeaderString("access_token");
-        String res = loginToken.get(access_token);
+        SessionToken res = loginToken.get(access_token);
 
         if (res != null) {
 
@@ -196,5 +217,40 @@ public class LAFResource {
 
         return Response.status(Response.Status.ACCEPTED).entity("").build();
 
+    }
+
+    private SessionToken createTokenObject(String token) {
+        Calendar present = Calendar.getInstance();
+        Calendar future = Calendar.getInstance();
+        int hour = future.get(Calendar.HOUR_OF_DAY);
+        int min = future.get(Calendar.MINUTE);
+        future.add(Calendar.MINUTE, 30);
+
+        return new SessionToken(present.getTime(), future.getTime(), token);
+    }
+
+    @Timeout
+    public void unregisterToken(Timer timer) {
+
+   
+        SessionToken r = (SessionToken) timer.getInfo();
+        this.loginToken.remove(r.getToken());
+        System.out.println("token expired "+r.getToken());
+    }
+    
+    @Path("/test")
+    @GET
+    public Response testToken(@Context HttpHeaders hh){
+        
+         String access_token = hh.getHeaderString("access_token");
+        SessionToken res = loginToken.get(access_token);
+
+        
+        if (res != null) {
+
+            return Response.ok("yipee access granted", MediaType.TEXT_PLAIN).build();
+        } else {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Error("You require a valid token to make this request", 401)).build();
+        }
     }
 }

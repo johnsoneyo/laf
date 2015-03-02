@@ -41,6 +41,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "LafUser.findByDateCreated", query = "SELECT l FROM LafUser l WHERE l.dateCreated = :dateCreated"),
     @NamedQuery(name = "LafUser.findByDateModified", query = "SELECT l FROM LafUser l WHERE l.dateModified = :dateModified")})
 public class LafUser implements Serializable {
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Column(name = "credit")
+    private Double credit;
     @Size(max = 32)
     @Column(name = "first_name")
     private String firstName;
@@ -209,6 +212,14 @@ public class LafUser implements Serializable {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public Double getCredit() {
+        return credit;
+    }
+
+    public void setCredit(Double credit) {
+        this.credit = credit;
     }
     
 }
