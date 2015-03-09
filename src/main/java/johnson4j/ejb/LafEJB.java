@@ -151,7 +151,6 @@ public class LafEJB {
         u.setLastName(usr.getLast_name());
         u.setEmail(usr.getEmail());
         u.setPassword(new String(Base64.encodeBase64(usr.getPassword().getBytes())));
-        u.setDob(parseDate(usr.getDob()));
         u.setPhone(usr.getPhone());
         u.setScreenName(usr.getScreen_name());
         u.setDateCreated(new Date());
@@ -162,12 +161,12 @@ public class LafEJB {
         usm.setLafId(u.getLafId());
         em.merge(usm);
         
-        Calendar c = Calendar.getInstance();
-        c.setTime(u.getDob());
-        ScheduleExpression birthDay = new ScheduleExpression().
-                dayOfMonth(Calendar.DAY_OF_MONTH).month(Calendar.MONTH);
-        
-        timerService.createCalendarTimer(birthDay, new TimerConfig(u, true));
+//        Calendar c = Calendar.getInstance();
+//        c.setTime(u.getDob());
+//        ScheduleExpression birthDay = new ScheduleExpression().
+//                dayOfMonth(Calendar.DAY_OF_MONTH).month(Calendar.MONTH);
+//        
+//        timerService.createCalendarTimer(birthDay, new TimerConfig(u, true));
         
         return u;
     }
@@ -191,7 +190,10 @@ public class LafEJB {
             d = date.parse(dob);
         } catch (ParseException e) {
             throw new LafException(e.getMessage() + " Use yyyy-MM-dd format instead");
+        }catch(NullPointerException np){
+            throw new LafException("please provide a date"); 
         }
+        
         return d;
         
     }
@@ -297,8 +299,20 @@ public class LafEJB {
     
     public List<Events> getEvents(String count) {
         
-        Query q = em.createNativeQuery("select * from events limit " + Integer.parseInt(count), Events.class);
+        Query q = em.createNativeQuery("select * from events order by created_time desc limit " + Integer.parseInt(count), Events.class);
         List<Events> resultList = q.getResultList();
         return resultList;
     }
+    
+
+    public LafUser getUser(String user_id)throws LafException {
+    LafUser u =  em.find(LafUser.class,Integer.parseInt(user_id));
+    
+    if(u!=null){
+      return u;  
+    }else throw new LafException("user not found");
+    
+    }
+    
+    
 }

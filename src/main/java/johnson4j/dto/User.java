@@ -12,19 +12,16 @@ import com.crowninteractive.anote.NullValidator;
  */
 public class User {
     
-    @NullValidator
+   
     private String first_name;
-    @NullValidator
     private String last_name;
     @NullValidator
     private String email;
-    @NullValidator
     private String dob;
     @NullValidator
     private String password;
     @NullValidator
     private String screen_name;
-    @NullValidator
     private String phone;
 
     public String getEmail() {

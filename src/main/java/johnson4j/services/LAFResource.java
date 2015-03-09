@@ -104,13 +104,15 @@ public class LAFResource {
 
     @PUT
     @Path("/updateUser")
-    public Response updateUser(@Context HttpHeaders hh, UpdateUser usr) {
+    public Response updateUser(
+//            @Context HttpHeaders hh,
+            UpdateUser usr) {
 
+//
+//        String access_token = hh.getHeaderString("access_token");
+//        SessionToken res = loginToken.get(access_token);
 
-        String access_token = hh.getHeaderString("access_token");
-        SessionToken res = loginToken.get(access_token);
-
-        if (res != null) {
+//        if (res != null) {
 
             try {
                 LafUser u = lafEJB.updateUser(usr);
@@ -119,9 +121,9 @@ public class LAFResource {
                 return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(), 404)).build();
             }
 
-        } else {
-            return Response.status(Response.Status.UNAUTHORIZED).entity(new Error("You require a valid token to make this request", 401)).build();
-        }
+//        } else {
+//            return Response.status(Response.Status.UNAUTHORIZED).entity(new Error("You require a valid token to make this request", 401)).build();
+//        }
 
     }
 
@@ -277,8 +279,22 @@ public class LAFResource {
     public Response getEvents(@PathParam("count")String count){
         
        List<Events>evt = this.lafEJB.getEvents(count);
-        System.out.println("eveent "+evt);
-        return Response.status(Response.Status.OK).entity("hey guys").build();
+        return Response.status(Response.Status.OK).entity(evt).build();
+        
+    }
+    
+    @Path("/getUser/{user_id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUser(@PathParam("user_id")String user_id){
+        
+       try{ 
+      LafUser lu =  this.lafEJB.getUser(user_id);
+      return Response.status(Response.Status.OK).entity(lu).build();
+       }
+       catch(LafException le){
+          return Response.status(Response.Status.NOT_FOUND).entity(new Error(le.getMessage(),404)).build(); 
+       }
         
     }
     
