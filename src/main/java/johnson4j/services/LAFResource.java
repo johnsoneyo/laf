@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -37,6 +38,7 @@ import johnson4j.ejb.LafEJB;
 import johnson4j.dto.Error;
 import johnson4j.dto.SessionToken;
 import johnson4j.dto.UpdateUser;
+import johnson4j.entity.Events;
 import johnson4j.entity.LafUser;
 import johnson4j.exception.LafException;
 import johnson4j.util.TokenGenerator;
@@ -164,22 +166,27 @@ public class LAFResource {
     public Response login(User usr) {
         try {
             LafUser lu = lafEJB.login(usr);
-            String access_token = tkGen.generateToken();
-
-            SessionToken s = createTokenObject(access_token);
-            Date d = s.getEndTime();
-            Calendar cl = Calendar.getInstance();
-            cl.setTime(d);
-
-            loginToken.put(access_token, s);
-
-            ScheduleExpression se = new ScheduleExpression().second(cl.get(Calendar.SECOND))
-                    .minute(cl.get(Calendar.MINUTE)).hour(cl.get(Calendar.HOUR));
-            time.createCalendarTimer(se, new TimerConfig(s, true));
-
-
-            return Response.status(Response.Status.ACCEPTED).
-                    entity(lu).header("access_token", access_token)
+           
+//            String access_token = tkGen.generateToken();
+//
+//            SessionToken s = createTokenObject(access_token);
+//            Date d = s.getEndTime();
+//            Calendar cl = Calendar.getInstance();
+//            cl.setTime(d);
+//
+//            loginToken.put(access_token, s);
+//
+//            ScheduleExpression se = new ScheduleExpression().second(cl.get(Calendar.SECOND))
+//                    .minute(cl.get(Calendar.MINUTE)).hour(cl.get(Calendar.HOUR));
+//            time.createCalendarTimer(se, new TimerConfig(s, true));
+//
+//
+//            return Response.status(Response.Status.ACCEPTED).
+//                    entity(lu).header("access_token", access_token)
+//                    .build();
+            
+                        return Response.status(Response.Status.ACCEPTED).
+                    entity(lu)
                     .build();
 
         } catch (LafException le) {
@@ -224,28 +231,28 @@ public class LAFResource {
         Calendar future = Calendar.getInstance();
         int hour = future.get(Calendar.HOUR_OF_DAY);
         int min = future.get(Calendar.MINUTE);
-        future.add(Calendar.MINUTE, 30);
+        future.add(Calendar.MINUTE, 60);
 
         return new SessionToken(present.getTime(), future.getTime(), token);
     }
 
-    @Timeout
-    public void unregisterToken(Timer timer) {
+//    @Timeout
+//    public void unregisterToken(Timer timer) {
+//
+//
+//        SessionToken r = (SessionToken) timer.getInfo();
+//        this.loginToken.remove(r.getToken());
+//        System.out.printf("token %s expired ", r.getToken());
+//    }
 
-   
-        SessionToken r = (SessionToken) timer.getInfo();
-        this.loginToken.remove(r.getToken());
-        System.out.println("token expired "+r.getToken());
-    }
-    
     @Path("/test")
     @GET
-    public Response testToken(@Context HttpHeaders hh){
-        
-         String access_token = hh.getHeaderString("access_token");
+    public Response testToken(@Context HttpHeaders hh) {
+
+        String access_token = hh.getHeaderString("access_token");
         SessionToken res = loginToken.get(access_token);
 
-        
+
         if (res != null) {
 
             return Response.ok("yipee access granted", MediaType.TEXT_PLAIN).build();
@@ -253,4 +260,28 @@ public class LAFResource {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Error("You require a valid token to make this request", 401)).build();
         }
     }
+    
+    
+
+    @Path("/changeImage")
+    @GET
+    public Response changeImage() {
+
+        throw new UnsupportedOperationException("");
+        
+    }
+    
+    @Path("/events/{count}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEvents(@PathParam("count")String count){
+        
+       List<Events>evt = this.lafEJB.getEvents(count);
+        System.out.println("eveent "+evt);
+        return Response.status(Response.Status.OK).entity("hey guys").build();
+        
+    }
+    
+    
+    
 }

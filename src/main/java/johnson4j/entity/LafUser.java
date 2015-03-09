@@ -14,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
@@ -41,6 +42,10 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "LafUser.findByDateCreated", query = "SELECT l FROM LafUser l WHERE l.dateCreated = :dateCreated"),
     @NamedQuery(name = "LafUser.findByDateModified", query = "SELECT l FROM LafUser l WHERE l.dateModified = :dateModified")})
 public class LafUser implements Serializable {
+    @Lob
+    @Size(max = 16777215)
+    @Column(name = "image")
+    private String image;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "credit")
     private Double credit;
@@ -220,6 +225,14 @@ public class LafUser implements Serializable {
 
     public void setCredit(Double credit) {
         this.credit = credit;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
     
 }
