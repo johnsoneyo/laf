@@ -36,7 +36,7 @@ and open the template in the editor.
                     </tr>
 
                     <tr>
-                        <td>web/lafresource/updateUser</td><td>PUT</td><td></td><td>id,first_name,last_name,email,phone,screen_name,dob,password</td>
+                        <td>web/lafresource/updateUser</td><td>POST</td><td></td><td>id,first_name,last_name,email,phone,screen_name,dob,password</td>
                     </tr>
 
                     <tr>
@@ -70,7 +70,14 @@ and open the template in the editor.
                         <td>web/lafresource/getUser/{user_id}</td><td>GET</td><td></td><td></td>
                     </tr>
 
-
+                    <tr>
+                        <td>web/lafresource/resetPassword/{email}</td><td>GET</td><td></td><td></td>
+                    </tr>
+                    
+                     <tr>
+                        <td>web/lafresource/changePassword/{token}/{password}</td><td>GET</td><td></td><td></td>
+                    </tr>
+                   
                 </table></div>
 
         </div>

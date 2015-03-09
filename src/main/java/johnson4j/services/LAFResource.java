@@ -7,17 +7,12 @@ package johnson4j.services;
 import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
-import javax.ejb.ScheduleExpression;
 import javax.ejb.Stateless;
-import javax.ejb.Timeout;
-import javax.ejb.Timer;
-import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -101,8 +96,9 @@ public class LAFResource {
         }
 
     }
+    
 
-    @PUT
+    @POST
     @Path("/updateUser")
     public Response updateUser(
 //            @Context HttpHeaders hh,
@@ -146,8 +142,6 @@ public class LAFResource {
         } else {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Error("You require a valid token to make this request", 401)).build();
         }
-
-
 
     }
 
@@ -298,6 +292,27 @@ public class LAFResource {
         
     }
     
+    
+    @Path("/resetPassword/{email}")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response resetPassword(){
+        
+       throw new UnsupportedOperationException(""); 
+        
+        
+    }
+    
+    @Path("/changePassword/{token}/{password}")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response changePassword(){
+        
+       throw new UnsupportedOperationException(""); 
+        
+        
+    }
+            
     
     
 }
