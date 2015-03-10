@@ -42,8 +42,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "LafUser.findByDateCreated", query = "SELECT l FROM LafUser l WHERE l.dateCreated = :dateCreated"),
     @NamedQuery(name = "LafUser.findByDateModified", query = "SELECT l FROM LafUser l WHERE l.dateModified = :dateModified")})
 public class LafUser implements Serializable {
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "lafUser")
-    private LafUserToken lafUserToken;
+   
     @Lob
     @Size(max = 16777215)
     @Column(name = "image")
@@ -237,12 +236,6 @@ public class LafUser implements Serializable {
         this.image = image;
     }
 
-    public LafUserToken getLafUserToken() {
-        return lafUserToken;
-    }
-
-    public void setLafUserToken(LafUserToken lafUserToken) {
-        this.lafUserToken = lafUserToken;
-    }
+  
     
 }

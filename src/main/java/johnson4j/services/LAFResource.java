@@ -65,9 +65,9 @@ public class LAFResource {
     Map<String, SessionToken> loginToken = new HashMap();
     @Resource
     TimerService time;
-    
-    @PersistenceContext  EntityManager em;
-     
+    @PersistenceContext
+    EntityManager em;
+
     @GET
     @Path("/facebookDetail")
     @Produces(MediaType.APPLICATION_JSON)
@@ -168,7 +168,7 @@ public class LAFResource {
     @POST
     @Path("/login")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response login(User usr) {
         try {
             LafUser lu = lafEJB.login(usr);
@@ -242,8 +242,6 @@ public class LAFResource {
         return new SessionToken(present.getTime(), future.getTime(), token);
     }
 
-   
-
 //    @Timeout
 //    public void unregisterToken(Timer timer) {
 //
@@ -252,10 +250,6 @@ public class LAFResource {
 //        this.loginToken.remove(r.getToken());
 //        System.out.printf("token %s expired ", r.getToken());
 //    }
-    
-   
-    
-    
     @Path("/test")
     @GET
     public Response testToken(@Context HttpHeaders hh) {
@@ -312,7 +306,6 @@ public class LAFResource {
         try {
 
             LafUserToken token = this.lafEJB.resetPassword(email);
-           
 
             return Response.status(Response.Status.OK).entity(token).build();
         } catch (LafException no) {
@@ -326,14 +319,15 @@ public class LAFResource {
     @Path("/changePassword/{token}/{password}")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public Response changePassword() {
+    public Response changePassword(@PathParam("token") String token, @PathParam("password") String password) {
 
-        throw new UnsupportedOperationException("");
+        try {
+            lafEJB.changePassword(token, password);
+            return Response.status(Response.Status.OK).entity("Password change").build();
+        } catch (LafException no) {
+            return Response.status(Response.Status.FORBIDDEN).entity(no.getMessage()).build();
+        }
 
 
     }
-    
-    
-    
-    
 }

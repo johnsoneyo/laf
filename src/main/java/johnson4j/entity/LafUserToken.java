@@ -20,6 +20,7 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -57,9 +58,7 @@ public class LafUserToken implements Serializable {
     @Column(name = "expiry_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date expiryDate;
-    @JoinColumn(name = "laf_id", referencedColumnName = "laf_id", insertable = false, updatable = false)
-    @OneToOne(optional = false)
-    private LafUser lafUser;
+   
 
     public LafUserToken() {
     }
@@ -107,14 +106,7 @@ public class LafUserToken implements Serializable {
         this.expiryDate = expiryDate;
     }
 
-    public LafUser getLafUser() {
-        return lafUser;
-    }
-
-    public void setLafUser(LafUser lafUser) {
-        this.lafUser = lafUser;
-    }
-
+   
     @Override
     public int hashCode() {
         int hash = 0;

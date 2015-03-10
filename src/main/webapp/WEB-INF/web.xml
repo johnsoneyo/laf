@@ -27,7 +27,7 @@ version="3.0">
 
     <init-param>
         <param-name>cors.supportedMethods</param-name>
-        <param-value>GET, HEAD, POST, DELETE, OPTIONS,PUT</param-value>
+        <param-value>GET, HEAD, POST, DELETE, OPTIONS</param-value>
     </init-param>
 
     <init-param>

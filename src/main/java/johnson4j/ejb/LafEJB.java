@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
@@ -25,6 +26,13 @@ import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -334,7 +342,7 @@ public class LafEJB {
             String token = tokn.generatePasswordToken();
             LafUserToken lut = new LafUserToken();
 
-            PasswordToken pt = this.createPasswordToken(lut.getLafId());
+            PasswordToken pt = this.createPasswordToken(lu.getLafId());
 
             Date d = pt.getExpiry_time();
             Calendar cl = Calendar.getInstance();
@@ -349,11 +357,13 @@ public class LafEJB {
             lut.setExpiryDate(pt.getExpiry_time());
             lut.setCreationDate(pt.getCreated_time());
             lut.setLafId(lu.getLafId());
-
+ 
             em.merge(lut);
 
+            sendEmail(lu.getEmail(),lut.getTokenValue());
             return lut;
 
+            
         } catch (NoResultException no) {
             throw new LafException("email not associated with any account");
         }
@@ -367,7 +377,7 @@ public class LafEJB {
         Calendar future = Calendar.getInstance();
         int hour = future.get(Calendar.HOUR_OF_DAY);
         int min = future.get(Calendar.MINUTE);
-        future.add(Calendar.MINUTE, 1);
+        future.add(Calendar.MINUTE, 30);
 
         return new PasswordToken(laf_id, present.getTime(), future.getTime());
     }
@@ -379,6 +389,68 @@ public class LafEJB {
         PasswordToken p = (PasswordToken) timer.getInfo();
         LafUserToken lu = em.find(LafUserToken.class, p.getLaf_id());
         lu.setStatus(TokenStatus.EXPIRED);
-        System.out.printf("token %s expired ", lu.getTokenValue());
+        em.merge(lu);
+       
+        
     }
+
+    private void sendEmail(String email,String token) {
+     final String username = "johnsoneyo@gmail.com";
+        final String password = "freaks03";
+
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "25");
+        Session session = Session.getInstance(props,
+                new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(username, password);
+                    }
+                });
+
+        try {
+
+            Message message = new MimeMessage(session);
+            message.setSentDate(new java.util.Date());
+            message.setFrom(new InternetAddress("johnsoneyo@gmail.com"));
+            message.setRecipients(Message.RecipientType.TO,
+                    InternetAddress.parse(email));
+            message.setSubject("LAF Password Reset ");
+            message.setText("LAFToken password Token : "+token+"Please disregard mail if you didnt request "
+            + "this change, token expires in 30 mins");
+
+            Transport.send(message);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+   
+    
+    }
+
+    public void changePassword(String token, String password) throws LafException{
+        Query q = em.createQuery("select l from LafUserToken l where l.tokenValue = :tokenValue");
+        q.setParameter("tokenValue", token);
+        
+        
+        try{
+          LafUserToken lf = (LafUserToken)q.getSingleResult();
+        LafUser lu =  em.find(LafUser.class, lf.getLafId());
+           if(lf.getStatus().equals(TokenStatus.EXPIRED)){
+               throw new LafException("Token expired ");
+           }else{
+                lu.setPassword(new String(Base64.encodeBase64(password.getBytes())));
+                em.merge(lu);
+           }
+               
+        }catch(NoResultException no){
+            
+        }
+    }
+    
+    
+    
 }
+
