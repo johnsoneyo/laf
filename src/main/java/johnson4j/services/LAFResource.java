@@ -7,13 +7,20 @@ package johnson4j.services;
 import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.ejb.ScheduleExpression;
 import javax.ejb.Stateless;
+import javax.ejb.Timeout;
+import javax.ejb.Timer;
+import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.core.Context;
@@ -21,7 +28,6 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -31,10 +37,13 @@ import javax.ws.rs.core.Response;
 import johnson4j.dto.User;
 import johnson4j.ejb.LafEJB;
 import johnson4j.dto.Error;
+import johnson4j.dto.PasswordToken;
 import johnson4j.dto.SessionToken;
+import johnson4j.dto.TokenStatus;
 import johnson4j.dto.UpdateUser;
 import johnson4j.entity.Events;
 import johnson4j.entity.LafUser;
+import johnson4j.entity.LafUserToken;
 import johnson4j.exception.LafException;
 import johnson4j.util.TokenGenerator;
 
@@ -56,7 +65,9 @@ public class LAFResource {
     Map<String, SessionToken> loginToken = new HashMap();
     @Resource
     TimerService time;
-
+    
+    @PersistenceContext  EntityManager em;
+     
     @GET
     @Path("/facebookDetail")
     @Produces(MediaType.APPLICATION_JSON)
@@ -96,12 +107,11 @@ public class LAFResource {
         }
 
     }
-    
 
     @POST
     @Path("/updateUser")
     public Response updateUser(
-//            @Context HttpHeaders hh,
+            //            @Context HttpHeaders hh,
             UpdateUser usr) {
 
 //
@@ -110,12 +120,12 @@ public class LAFResource {
 
 //        if (res != null) {
 
-            try {
-                LafUser u = lafEJB.updateUser(usr);
-                return Response.status(Response.Status.OK).entity(u).build();
-            } catch (LafException lf) {
-                return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(), 404)).build();
-            }
+        try {
+            LafUser u = lafEJB.updateUser(usr);
+            return Response.status(Response.Status.OK).entity(u).build();
+        } catch (LafException lf) {
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(lf.getMessage(), 404)).build();
+        }
 
 //        } else {
 //            return Response.status(Response.Status.UNAUTHORIZED).entity(new Error("You require a valid token to make this request", 401)).build();
@@ -162,7 +172,7 @@ public class LAFResource {
     public Response login(User usr) {
         try {
             LafUser lu = lafEJB.login(usr);
-           
+
 //            String access_token = tkGen.generateToken();
 //
 //            SessionToken s = createTokenObject(access_token);
@@ -180,8 +190,8 @@ public class LAFResource {
 //            return Response.status(Response.Status.ACCEPTED).
 //                    entity(lu).header("access_token", access_token)
 //                    .build();
-            
-                        return Response.status(Response.Status.ACCEPTED).
+
+            return Response.status(Response.Status.ACCEPTED).
                     entity(lu)
                     .build();
 
@@ -195,15 +205,15 @@ public class LAFResource {
     @Path("/lafVideos/{maxResults}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLafVideos(@Context HttpHeaders hh, @PathParam("maxResults") String maxResults) {
-        String access_token = hh.getHeaderString("access_token");
-        SessionToken res = loginToken.get(access_token);
+//        String access_token = hh.getHeaderString("access_token");
+//        SessionToken res = loginToken.get(access_token);
+//
+//        if (res != null) {
 
-        if (res != null) {
-
-            return Response.ok(lafEJB.getLafVideos(maxResults), MediaType.APPLICATION_JSON).build();
-        } else {
-            return Response.status(Response.Status.UNAUTHORIZED).entity(new Error("You require a valid token to make this request", 401)).build();
-        }
+        return Response.ok(lafEJB.getLafVideos(maxResults), MediaType.APPLICATION_JSON).build();
+//        } else {
+//            return Response.status(Response.Status.UNAUTHORIZED).entity(new Error("You require a valid token to make this request", 401)).build();
+//        }
 
     }
 
@@ -232,6 +242,8 @@ public class LAFResource {
         return new SessionToken(present.getTime(), future.getTime(), token);
     }
 
+   
+
 //    @Timeout
 //    public void unregisterToken(Timer timer) {
 //
@@ -240,7 +252,10 @@ public class LAFResource {
 //        this.loginToken.remove(r.getToken());
 //        System.out.printf("token %s expired ", r.getToken());
 //    }
-
+    
+   
+    
+    
     @Path("/test")
     @GET
     public Response testToken(@Context HttpHeaders hh) {
@@ -256,63 +271,69 @@ public class LAFResource {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Error("You require a valid token to make this request", 401)).build();
         }
     }
-    
-    
 
     @Path("/changeImage")
     @GET
     public Response changeImage() {
 
         throw new UnsupportedOperationException("");
-        
+
     }
-    
+
     @Path("/events/{count}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getEvents(@PathParam("count")String count){
-        
-       List<Events>evt = this.lafEJB.getEvents(count);
+    public Response getEvents(@PathParam("count") String count) {
+
+        List<Events> evt = this.lafEJB.getEvents(count);
         return Response.status(Response.Status.OK).entity(evt).build();
-        
+
     }
-    
+
     @Path("/getUser/{user_id}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUser(@PathParam("user_id")String user_id){
-        
-       try{ 
-      LafUser lu =  this.lafEJB.getUser(user_id);
-      return Response.status(Response.Status.OK).entity(lu).build();
-       }
-       catch(LafException le){
-          return Response.status(Response.Status.NOT_FOUND).entity(new Error(le.getMessage(),404)).build(); 
-       }
-        
+    public Response getUser(@PathParam("user_id") String user_id) {
+
+        try {
+            LafUser lu = this.lafEJB.getUser(user_id);
+            return Response.status(Response.Status.OK).entity(lu).build();
+        } catch (LafException le) {
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(le.getMessage(), 404)).build();
+        }
+
     }
-    
-    
+
     @Path("/resetPassword/{email}")
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response resetPassword(){
-        
-       throw new UnsupportedOperationException(""); 
-        
-        
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response resetPassword(@PathParam("email") String email) {
+
+        try {
+
+            LafUserToken token = this.lafEJB.resetPassword(email);
+           
+
+            return Response.status(Response.Status.OK).entity(token).build();
+        } catch (LafException no) {
+            return Response.status(Response.Status.NOT_FOUND).entity(new Error(no.getMessage(), 404)).build();
+        }
+
+
+
     }
-    
+
     @Path("/changePassword/{token}/{password}")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public Response changePassword(){
-        
-       throw new UnsupportedOperationException(""); 
-        
-        
+    public Response changePassword() {
+
+        throw new UnsupportedOperationException("");
+
+
     }
-            
+    
+    
     
     
 }

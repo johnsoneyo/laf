@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.ejb.ScheduleExpression;
 import javax.ejb.Stateless;
 import javax.ejb.Timeout;
@@ -28,13 +29,17 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import johnson4j.dto.PasswordToken;
+import johnson4j.dto.TokenStatus;
 import johnson4j.dto.UpdateUser;
 import johnson4j.dto.User;
 import johnson4j.entity.Events;
 import johnson4j.entity.LafUser;
 import johnson4j.entity.LafUserMedia;
+import johnson4j.entity.LafUserToken;
 import johnson4j.exception.LafException;
 import johnson4j.util.LafBundle;
+import johnson4j.util.TokenGenerator;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 
@@ -47,30 +52,34 @@ import org.apache.commons.io.IOUtils;
 //backend validation on screen_name
 @Stateless
 public class LafEJB {
-    
+
     private final Logger log = Logger.getLogger(getClass().getName());
     @PersistenceContext
     EntityManager em;
     @Resource
     TimerService timerService;
-    
+    @EJB
+    TokenGenerator tokn;
+    @Resource
+    TimerService time;
+
     public String getFaceBookDetail(String access_token) throws LafException {
         if (access_token != null) {
-            
+
             String fbk = LafBundle.facebookGraph();
             String response = processRequest(fbk + "/me?field=id,name,picture&access_token=" + access_token);
-            
+
             JsonElement dataElem = new JsonParser().parse(response);
             String socId = dataElem.getAsJsonObject().get("id").getAsString();
-            
+
             return response;
         } else {
             throw new LafException("Access token is required");
         }
     }
-    
+
     private String processRequest(String reqURL) {
-        
+
         try {
             URL url = new URL(reqURL);
             HttpURLConnection request = (HttpURLConnection) url.openConnection();
@@ -80,73 +89,73 @@ public class LafEJB {
             InputStream is = request.getInputStream();
             IOUtils.copy(is, sw);
             return sw.toString();
-            
+
         } catch (Exception ex) {
-            
+
             ex.printStackTrace();
             return null;
         }
-        
+
     }
-    
+
     private String processPostRequest(String reqURL) {
-        
+
         try {
             URL url = new URL(reqURL);
             HttpURLConnection request = (HttpURLConnection) url.openConnection();
             request.setRequestMethod("POST");
             request.connect();
-            
+
             StringWriter sw = new StringWriter();
-            
+
             InputStream is = request.getInputStream();
             IOUtils.copy(is, sw);
-            
+
             return sw.toString();
-            
+
         } catch (Exception ex) {
-            
+
             ex.printStackTrace();
             return null;
         }
-        
+
     }
-    
+
     public byte[] getFacebookPhoto(String id, int height, int width) {
-        
+
         String fbk = LafBundle.facebookGraph();
         return processImageRequest(fbk + "/" + id + "/picture?width=" + width + "&height=" + height);
-        
+
     }
-    
+
     private byte[] processImageRequest(String reqURL) {
-        
+
         try {
             URL url = new URL(reqURL);
             HttpURLConnection request = (HttpURLConnection) url.openConnection();
             request.setRequestMethod("GET");
             request.connect();
-            
+
             StringWriter sw = new StringWriter();
-            
+
             InputStream is = request.getInputStream();
             return IOUtils.toByteArray(is);
-            
+
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
-        
-        
+
+
     }
-    
+
     public LafUser createUser(johnson4j.dto.User usr) throws LafException {
-        
+
         LafUser u = new LafUser();
-        
+
         validateUserEmail(usr.getEmail());
         validateScreen(usr.getScreen_name());
-        
+
         u.setFirstName(usr.getFirst_name());
         u.setLastName(usr.getLast_name());
         u.setEmail(usr.getEmail());
@@ -160,17 +169,17 @@ public class LafEJB {
         LafUserMedia usm = new LafUserMedia();
         usm.setLafId(u.getLafId());
         em.merge(usm);
-        
+
 //        Calendar c = Calendar.getInstance();
 //        c.setTime(u.getDob());
 //        ScheduleExpression birthDay = new ScheduleExpression().
 //                dayOfMonth(Calendar.DAY_OF_MONTH).month(Calendar.MONTH);
 //        
 //        timerService.createCalendarTimer(birthDay, new TimerConfig(u, true));
-        
+
         return u;
     }
-    
+
     public LafUser addFaceBook(String id, String laf_id) {
         LafUser usr = em.find(johnson4j.entity.LafUser.class, Integer.parseInt(laf_id));
         //        Query q = em.createNativeQuery("update user_social_media set facebook_id = '"+id+"' where user_id = ' "+laf_id+" ' ");
@@ -179,10 +188,10 @@ public class LafEJB {
         LafUserMedia lm = usr.getLafUserMedia();
         lm.setFacebookId(id);
         em.merge(lm);
-        
+
         return usr;
     }
-    
+
     private Date parseDate(String dob) throws LafException {
         Date d = null;
         try {
@@ -190,14 +199,14 @@ public class LafEJB {
             d = date.parse(dob);
         } catch (ParseException e) {
             throw new LafException(e.getMessage() + " Use yyyy-MM-dd format instead");
-        }catch(NullPointerException np){
-            throw new LafException("please provide a date"); 
+        } catch (NullPointerException np) {
+            throw new LafException("please provide a date");
         }
-        
+
         return d;
-        
+
     }
-    
+
     @Timeout
     public void sendBirthdayEmail(Timer timer) {
         LafUser lu = (LafUser) timer.getInfo();
@@ -205,36 +214,36 @@ public class LafEJB {
         //send birthday email 
 
     }
-    
+
     public String publishPost(String id, String message, String access_token, String link, String place) {
         String fbg = LafBundle.facebookGraph();
-        
+
         return this.processPostRequest(fbg + "/" + id + "/feed?message=" + message + "&link=" + link + "&access_token=" + access_token);
-        
+
     }
-    
+
     private void validateUserEmail(String email) throws LafException {
         Query q = em.createQuery("select u from LafUser u where u.email = :email");
         q.setParameter("email", email);
         try {
             LafUser l = (LafUser) q.getSingleResult();
-            
+
             if (l != null) {
                 throw new LafException("email address already exists");
             }
         } catch (NoResultException no) {
             log.log(Level.INFO, "no such email exists");
         }
-        
+
     }
-    
+
     private void validateScreen(String screen_name) throws LafException {
-        
+
         Query q = em.createQuery("select u from LafUser u where u.screenName = :screenName");
         q.setParameter("screenName", screen_name);
         try {
             LafUser l = (LafUser) q.getSingleResult();
-            
+
             if (l != null) {
                 throw new LafException("screen name already exists");
             }
@@ -242,9 +251,9 @@ public class LafEJB {
             log.log(Level.INFO, "no such screen name");
         }
     }
-    
+
     public LafUser login(User usr) throws LafException {
-        
+
         Query q = em.createQuery("select l from LafUser l where l.email = :email and l.password = :password ");
         byte[] pwd = Base64.encodeBase64(usr.getPassword().getBytes());
         try {
@@ -256,20 +265,20 @@ public class LafEJB {
         } catch (NullPointerException no) {
             throw new LafException("One missing field");
         }
-        
+
     }
-    
+
     public String getLafVideos(String maxResults) {
-        
+
         String ytbe = LafBundle.youTubeV3();
         String googl_key = LafBundle.getGoogleKey();
         String channel_id = LafBundle.getChannel();
         return this.processRequest(ytbe + "/search?key=" + googl_key + "&channelId=" + channel_id + "&part=snippet,id&order=date&maxResults=" + maxResults);
     }
-    
+
     public LafUser updateUser(UpdateUser usr) throws LafException {
-        
-        
+
+
         LafUser u = em.find(LafUser.class, Integer.parseInt(usr.getId()));
         if (u != null) {
             u.setDateModified(new Date());
@@ -283,36 +292,93 @@ public class LafEJB {
         } else {
             throw new LafException("No user found ");
         }
-        
+
     }
-    
+
     public void removeUser(String id) throws LafException {
-        
+
         LafUser u = em.find(LafUser.class, Integer.parseInt(id));
         if (u != null) {
             em.remove(u);
         } else {
             throw new LafException("No user found ");
         }
-        
+
     }
-    
+
     public List<Events> getEvents(String count) {
-        
+
         Query q = em.createNativeQuery("select * from events order by created_time desc limit " + Integer.parseInt(count), Events.class);
         List<Events> resultList = q.getResultList();
         return resultList;
     }
-    
 
-    public LafUser getUser(String user_id)throws LafException {
-    LafUser u =  em.find(LafUser.class,Integer.parseInt(user_id));
-    
-    if(u!=null){
-      return u;  
-    }else throw new LafException("user not found");
-    
+    public LafUser getUser(String user_id) throws LafException {
+        LafUser u = em.find(LafUser.class, Integer.parseInt(user_id));
+
+        if (u != null) {
+            return u;
+        } else {
+            throw new LafException("user not found");
+        }
+
     }
+
+    public LafUserToken resetPassword(String email) throws LafException {
+        Query q = em.createQuery("select l from LafUser l where l.email =:email");
+        q.setParameter("email", email);
+
+        try {
+            LafUser lu = (LafUser) q.getSingleResult();
+
+            String token = tokn.generatePasswordToken();
+            LafUserToken lut = new LafUserToken();
+
+            PasswordToken pt = this.createPasswordToken(lut.getLafId());
+
+            Date d = pt.getExpiry_time();
+            Calendar cl = Calendar.getInstance();
+            cl.setTime(d);
+
+            ScheduleExpression se = new ScheduleExpression().second(cl.get(Calendar.SECOND))
+                    .minute(cl.get(Calendar.MINUTE)).hour(cl.get(Calendar.HOUR));
+            time.createCalendarTimer(se, new TimerConfig(pt, true));
+
+            lut.setTokenValue(token);
+            lut.setStatus(TokenStatus.ACTIVE);
+            lut.setExpiryDate(pt.getExpiry_time());
+            lut.setCreationDate(pt.getCreated_time());
+            lut.setLafId(lu.getLafId());
+
+            em.merge(lut);
+
+            return lut;
+
+        } catch (NoResultException no) {
+            throw new LafException("email not associated with any account");
+        }
+
+
+
+    }
+
+    private PasswordToken createPasswordToken(int laf_id) {
+        Calendar present = Calendar.getInstance();
+        Calendar future = Calendar.getInstance();
+        int hour = future.get(Calendar.HOUR_OF_DAY);
+        int min = future.get(Calendar.MINUTE);
+        future.add(Calendar.MINUTE, 1);
+
+        return new PasswordToken(laf_id, present.getTime(), future.getTime());
+    }
+
     
-    
+    @Timeout
+    public void changeTokenStatus(Timer timer) {
+
+        PasswordToken p = (PasswordToken) timer.getInfo();
+        LafUserToken lu = em.find(LafUserToken.class, p.getLaf_id());
+        lu.setStatus(TokenStatus.EXPIRED);
+        System.out.printf("token %s expired ", lu.getTokenValue());
+    }
 }

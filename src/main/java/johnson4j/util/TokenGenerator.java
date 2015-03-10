@@ -19,4 +19,8 @@ public class TokenGenerator {
     public String generateToken(){
     return  "laf_"+RandomStringUtils.randomAlphabetic(16);
     }
+    
+    public String generatePasswordToken(){
+        return RandomStringUtils.randomAlphanumeric(10);
+    }
 }
