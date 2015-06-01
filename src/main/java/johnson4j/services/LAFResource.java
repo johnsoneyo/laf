@@ -7,20 +7,13 @@ package johnson4j.services;
 import com.crowninteractive.handlers.NullHandler;
 import java.io.ByteArrayInputStream;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
-import javax.ejb.ScheduleExpression;
 import javax.ejb.Stateless;
-import javax.ejb.Timeout;
-import javax.ejb.Timer;
-import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.core.Context;
@@ -37,9 +30,7 @@ import javax.ws.rs.core.Response;
 import johnson4j.dto.User;
 import johnson4j.ejb.LafEJB;
 import johnson4j.dto.Error;
-import johnson4j.dto.PasswordToken;
 import johnson4j.dto.SessionToken;
-import johnson4j.dto.TokenStatus;
 import johnson4j.dto.UpdateUser;
 import johnson4j.entity.Events;
 import johnson4j.entity.LafUser;
@@ -65,9 +56,9 @@ public class LAFResource {
     Map<String, SessionToken> loginToken = new HashMap();
     @Resource
     TimerService time;
-    @PersistenceContext
-    EntityManager em;
-
+   
+    
+    
     @GET
     @Path("/facebookDetail")
     @Produces(MediaType.APPLICATION_JSON)

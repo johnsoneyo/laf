@@ -31,6 +31,6 @@ public class LafBundle {
     }
 
     public static String getChannel() {
-    return rb.getString("channel.id");
+    return rb.getString("johnson.eyo.id");
     }
 }
